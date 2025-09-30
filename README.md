@@ -4,6 +4,9 @@
 
 # OpenGov-Literacy Coach
 
+[![CI](https://github.com/llamasearchai/OpenGov-LiteracyCoach/actions/workflows/ci.yml/badge.svg)](https://github.com/llamasearchai/OpenGov-LiteracyCoach/actions/workflows/ci.yml)
+[![Release](https://github.com/llamasearchai/OpenGov-LiteracyCoach/actions/workflows/release.yml/badge.svg)](https://github.com/llamasearchai/OpenGov-LiteracyCoach/actions/workflows/release.yml)
+
 Voice-first AI literacy platform that combines speech-driven tutoring, rubric-aligned writing feedback, leveled text search, and teacher-facing analytics. The system is organized as a set of FastAPI microservices orchestrated through Docker Compose, with OpenAI SDK integrations for speech-to-text, text-to-speech, chat orchestration, and embeddings.
 
 ## Highlights

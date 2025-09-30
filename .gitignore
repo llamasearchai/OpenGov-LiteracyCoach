@@ -181,8 +181,8 @@ trivy-results.json
 # Docker
 .docker/
 
-# GitHub Actions
-.github/
+# GitHub Actions (keep workflows tracked)
+# .github/  # do not ignore; workflows must be committed
 
 # CI/CD
 .coverage
