@@ -1,0 +1,16 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "TelemetryEvent",
+    "type": "object",
+    "properties": {
+        "user_id": {"type": "string"},
+        "role": {"type": "string", "enum": ["student", "teacher", "parent"]},
+        "event_type": {"type": "string"},
+        "timestamp": {"type": "string", "format": "date-time"},
+        "session_id": {"type": "string"},
+        "metadata": {"type": "object"}
+    },
+    "required": ["event_type", "timestamp", "session_id"]
+}
+
+

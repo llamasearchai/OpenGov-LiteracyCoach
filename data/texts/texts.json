@@ -1,0 +1,34 @@
+[
+  {
+    "id": "decodable_cvc_01",
+    "title": "Sam and the Cat",
+    "text": "Sam had a cat. The cat sat on a mat. Sam sat. The cat sat. Sam had a nap. The cat had a nap.",
+    "lexile": 180,
+    "grade_band": "K-1",
+    "phonics_focus": "CVC short a",
+    "theme": "everyday",
+    "embedding": null
+  },
+  {
+    "id": "aesop_north_wind",
+    "title": "The North Wind and the Sun",
+    "text": "The North Wind and the Sun had a quarrel about which was the stronger. A traveler wrapped in a cloak came along. They agreed that the one who first succeeded in making the traveler take his cloak off should be considered stronger. The North Wind blew with all his might, but the more he blew the more closely the traveler folded his cloak. Then the Sun shone out warmly, and the traveler soon took off his cloak. The Sun was declared the stronger.",
+    "lexile": 650,
+    "grade_band": "2-4",
+    "phonics_focus": "",
+    "theme": "fable",
+    "embedding": null
+  },
+  {
+    "id": "library_place",
+    "title": "The Library",
+    "text": "The library smells of old paper and polished wood. Light falls in quiet squares on the floor. It is my favorite place because every shelf feels like a doorway. When I am there, I become calm and curious at once.",
+    "lexile": 700,
+    "grade_band": "5-7",
+    "phonics_focus": "",
+    "theme": "place",
+    "embedding": null
+  }
+]
+
+

@@ -1,0 +1,269 @@
+[build-system]
+requires = ["hatchling>=1.24.2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "literacy-coach"
+version = "1.2.0"
+description = "Voice-first AI literacy platform with OpenAI agents, assessments, and teacher tooling"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{ name = "Nik Jois" }]
+license = { text = "MIT" }
+dependencies = [
+    "fastapi>=0.111.0",
+    "uvicorn[standard]>=0.30.0",
+    "openai>=1.40.0",
+    "httpx>=0.27.0",
+    "pydantic>=2.8.2",
+    "python-multipart>=0.0.9",
+    "PyYAML>=6.0.1",
+    "numpy>=1.26.0",
+    "sqlalchemy>=2.0.32",
+    "aiosqlite>=0.20.0",
+    "typer>=0.12.3",
+    "rich>=13.9.2",
+    "textual>=0.70.0",
+    "click>=8.0.0",
+    "cryptography>=42.0.0",
+    "python-dotenv>=1.0.0"
+]
+
+[project.scripts]
+litcoach-gateway = "litcoach.services.gateway.app:main"
+litcoach-agent = "litcoach.services.agent.app:main"
+litcoach-content = "litcoach.services.content.app:main"
+litcoach-assessment = "litcoach.services.assessment.app:main"
+litcoach-teacher = "litcoach.services.teacher_api.app:main"
+litcoach-cli = "litcoach.cli:main"
+litcoach-tui = "litcoach.tui.app:main"
+
+[project.urls]
+Homepage = "https://github.com/opengov/literacy-coach"
+Repository = "https://github.com/opengov/literacy-coach"
+Issues = "https://github.com/opengov/literacy-coach/issues"
+Documentation = "https://github.com/opengov/literacy-coach/blob/main/README.md"
+
+[tool.hatch.build]
+include = ["src/litcoach", "data", "README.md", "LICENSE"]
+
+[tool.hatch.envs.default]
+dependencies = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest-cov>=4.0.0",
+    "pytest-xdist>=3.5.0",
+    "httpx>=0.27.0",
+    "respx>=0.20.0",
+    "anyio>=4.0.0",
+    "mypy>=1.8.0",
+    "pyright>=1.1.350",
+    "ruff>=0.1.0",
+    "black>=24.0.0",
+    "isort>=5.13.0",
+    "bandit>=1.7.0",
+    "pre-commit>=3.6.0",
+    "tox>=4.12.0",
+    "tox-uv>=1.7.0",
+    "coverage>=7.4.0",
+    "hypothesis>=6.98.0",
+    "locust>=2.20.0",
+    "trivy>=0.47.0",
+    "detect-secrets>=1.4.0"
+]
+
+[tool.hatch.envs.test]
+dependencies = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest-cov>=4.0.0",
+    "pytest-xdist>=3.5.0",
+    "httpx>=0.27.0",
+    "respx>=0.20.0",
+    "anyio>=4.0.0",
+    "coverage>=7.4.0",
+    "hypothesis>=6.98.0"
+]
+
+[tool.hatch.envs.lint]
+dependencies = [
+    "ruff>=0.1.0",
+    "black>=24.0.0",
+    "isort>=5.13.0",
+    "mypy>=1.8.0",
+    "bandit>=1.7.0",
+    "pre-commit>=3.6.0"
+]
+
+[tool.hatch.envs.security]
+dependencies = [
+    "bandit>=1.7.0",
+    "trivy>=0.47.0",
+    "detect-secrets>=1.4.0"
+]
+
+[tool.pytest.ini_options]
+addopts = "-q --strict-markers --strict-config --cov=src/litcoach --cov-report=term-missing --cov-report=html:htmlcov --cov-report=xml:coverage.xml --cov-fail-under=85"
+testpaths = ["tests"]
+markers = [
+    "unit: Unit tests",
+    "integration: Integration tests",
+    "e2e: End-to-end tests",
+    "slow: Slow running tests",
+    "property: Property-based tests"
+]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning"
+]
+
+[tool.coverage.run]
+source = ["src/litcoach"]
+omit = ["*/tests/*", "*/test_*", "*/__init__.py"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:"
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = [".venv", "venv", "__pycache__", "build", "dist", "*.egg-info"]
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "UP", # pyupgrade
+    "SIM", # flake8-simplify
+]
+ignore = [
+    "E501", # line too long, handled by black
+    "B008", # do not perform function calls in argument defaults
+    "C901", # too complex
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+"tests/*" = ["B011"] # assert false
+
+[tool.black]
+line-length = 100
+target-version = ['py311']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 100
+known_first_party = ["litcoach"]
+skip = [".venv", "venv", "__pycache__", "build", "dist", "*.egg-info"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+show_error_codes = true
+
+[[tool.mypy.overrides]]
+module = [
+    "litcoach.services.*.app",
+    "litcoach.cli",
+    "litcoach.utils.*"
+]
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+
+[tool.bandit]
+exclude_dirs = ["tests", ".venv", "venv", "build", "dist"]
+skips = ["B101", "B601"] # Skip assert checks and shell usage
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+envlist = py311, py312
+
+[testenv]
+deps =
+    pytest>=8.0.0
+    pytest-asyncio>=0.23.0
+    pytest-cov>=4.0.0
+    httpx>=0.27.0
+    respx>=0.20.0
+    anyio>=4.0.0
+    coverage>=7.4.0
+    hypothesis>=6.98.0
+commands =
+    pytest -q --cov=src/litcoach --cov-report=term-missing --cov-report=html:htmlcov --cov-report=xml:coverage.xml --cov-fail-under=85
+setenv =
+    PYTHONPATH = {toxinidir}/src
+"""
+
+[tool.hatch.envs.hatch-static-analysis]
+dependencies = [
+    "ruff>=0.1.0",
+    "black>=24.0.0",
+    "isort>=5.13.0",
+    "mypy>=1.8.0"
+]
+
+[tool.hatch.envs.hatch-test]
+dependencies = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest-cov>=4.0.0",
+    "pytest-xdist>=3.5.0",
+    "httpx>=0.27.0",
+    "respx>=0.20.0",
+    "anyio>=4.0.0",
+    "coverage>=7.4.0",
+    "hypothesis>=6.98.0"
+]
+
+[tool.hatch.scripts]
+test = "pytest -q"
+test-cov = "pytest -q --cov=src/litcoach --cov-report=term-missing --cov-report=html:htmlcov --cov-report=xml:coverage.xml"
+test-integration = "pytest -q -m integration"
+test-e2e = "pytest -q -m e2e"
+test-property = "pytest -q -m property"
+lint = "ruff check src/litcoach tests"
+lint-fix = "ruff check --fix src/litcoach tests"
+format = "black src/litcoach tests"
+format-check = "black --check src/litcoach tests"
+type-check = "mypy src/litcoach"
+security-scan = "bandit -r src/litcoach"
+pre-commit = "pre-commit run --all-files"
+tox = "tox -q"
+tox-parallel = "tox -q -p auto"

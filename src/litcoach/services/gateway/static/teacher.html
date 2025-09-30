@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>Teacher Dashboard | Literacy Coach</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <style>
+            body { font-family: system-ui, sans-serif; margin: 24px; line-height: 1.5; }
+            input, select { padding: 8px; margin: 6px 0; }
+            button { padding: 8px 12px; margin: 6px 0; }
+            table { border-collapse: collapse; width: 100%; }
+            th, td { border: 1px solid #ddd; padding: 8px; }
+            th { background: #f5f5f5; }
+            .nav { margin-bottom: 16px; }
+            .card { border: 1px solid #ddd; padding: 12px; border-radius: 6px; margin-bottom: 12px; }
+        </style>
+    </head>
+    <body>
+        <div class="nav"><a href="/">Home</a> | <a href="/reader.html">Reader</a> | <a href="/writer.html">Writer</a></div>
+        <h1>Teacher Dashboard</h1>
+
+        <div class="card">
+            <h2>Roster</h2>
+            <label>Class Name</label><input id="className" />
+            <button id="createClassBtn">Create Class</button>
+            <br />
+            <label>Import CSV (columns: student_id,student_name)</label>
+            <input type="file" id="csvFile" accept=".csv" />
+            <button id="importCsvBtn">Import to Selected Class</button>
+            <br />
+            <label>Select Class</label>
+            <select id="classSelect"></select>
+            <button id="refreshRosterBtn">Refresh Roster</button>
+            <div id="roster"></div>
+        </div>
+
+        <div class="card">
+            <h2>Assignments</h2>
+            <label>Type</label>
+            <select id="atype">
+                <option value="reading">reading</option>
+                <option value="writing">writing</option>
+            </select>
+            <label>Title</label><input id="atitle" />
+            <label>Details (text_id for reading; prompt for writing)</label><input id="adetails" />
+            <button id="createAssignBtn">Create Assignment</button>
+            <div id="assignments"></div>
+        </div>
+
+        <div class="card">
+            <h2>Analytics</h2>
+            <button id="loadAnalyticsBtn">Load Analytics</button>
+            <div id="analytics"></div>
+        </div>
+
+        <script>
+            const TEACHER_URL = location.origin.replace(":8000", ":8004");
+            const classSelect = document.getElementById('classSelect');
+            const rosterDiv = document.getElementById('roster');
+            const assignmentsDiv = document.getElementById('assignments');
+            const analyticsDiv = document.getElementById('analytics');
+
+            async function refreshClasses() {
+                const response = await fetch(TEACHER_URL + '/classes');
+                const data = await response.json();
+                classSelect.innerHTML = '';
+                data.results.forEach(cls => {
+                    const option = document.createElement('option');
+                    option.value = cls.id;
+                    option.textContent = cls.name;
+                    classSelect.appendChild(option);
+                });
+            }
+
+            async function refreshRoster() {
+                const classId = classSelect.value;
+                if (!classId) {
+                    return;
+                }
+                const rosterResponse = await fetch(TEACHER_URL + '/classes/' + classId + '/students');
+                const rosterData = await rosterResponse.json();
+                rosterDiv.innerHTML = '<table><tr><th>Student ID</th><th>Name</th></tr>' +
+                    rosterData.results.map(student => `<tr><td>${student.id}</td><td>${student.name}</td></tr>`).join('') + '</table>';
+
+                const assignmentsResponse = await fetch(TEACHER_URL + '/classes/' + classId + '/assignments');
+                const assignmentsData = await assignmentsResponse.json();
+                assignmentsDiv.innerHTML = '<table><tr><th>ID</th><th>Type</th><th>Title</th><th>Details</th></tr>' +
+                    assignmentsData.results.map(assignment => `<tr><td>${assignment.id}</td><td>${assignment.type}</td><td>${assignment.title}</td><td>${assignment.details}</td></tr>`).join('') + '</table>';
+            }
+
+            document.getElementById('createClassBtn').onclick = async () => {
+                const name = document.getElementById('className').value;
+                await fetch(TEACHER_URL + '/classes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name })
+                });
+                await refreshClasses();
+            };
+
+            document.getElementById('refreshRosterBtn').onclick = refreshRoster;
+
+            document.getElementById('importCsvBtn').onclick = async () => {
+                const classId = classSelect.value;
+                const file = document.getElementById('csvFile').files[0];
+                if (!file) {
+                    return;
+                }
+                const text = await file.text();
+                await fetch(TEACHER_URL + '/roster/import?class_id=' + encodeURIComponent(classId), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/csv' },
+                    body: text
+                });
+                await refreshRoster();
+            };
+
+            document.getElementById('createAssignBtn').onclick = async () => {
+                const classId = classSelect.value;
+                const type = document.getElementById('atype').value;
+                const title = document.getElementById('atitle').value;
+                const details = document.getElementById('adetails').value;
+                await fetch(TEACHER_URL + '/assignments', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ class_id: classId, type, title, details })
+                });
+                await refreshRoster();
+            };
+
+            document.getElementById('loadAnalyticsBtn').onclick = async () => {
+                const classId = classSelect.value;
+                const response = await fetch(TEACHER_URL + '/analytics/overview?class_id=' + encodeURIComponent(classId));
+                const data = await response.json();
+                analyticsDiv.textContent = JSON.stringify(data, null, 2);
+            };
+
+            (async function init() {
+                await refreshClasses();
+                await refreshRoster();
+            })();
+        </script>
+    </body>
+</html>
+
+

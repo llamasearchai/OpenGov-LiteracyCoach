@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>Reader | Literacy Coach</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <style>
+            body { font-family: system-ui, sans-serif; margin: 24px; line-height: 1.5; }
+            textarea { width: 100%; height: 160px; }
+            button { padding: 10px 16px; margin-right: 8px; }
+            .log { white-space: pre-wrap; background: #fafafa; border: 1px solid #eee; padding: 12px; }
+            .nav { margin-bottom: 16px; }
+        </style>
+    </head>
+    <body>
+        <div class="nav"><a href="/">Home</a> | <a href="/writer.html">Writer</a> | <a href="/teacher.html">Teacher Dashboard</a></div>
+        <h1>Reader</h1>
+        <p>Paste a passage and press Record. Read it aloud; the coach will help.</p>
+        <textarea id="referenceText" placeholder="Paste passage here..."></textarea>
+        <div>
+            <button id="recordBtn">Start Recording</button>
+            <button id="stopBtn" disabled>Stop</button>
+            <button id="resetBtn">Reset Session</button>
+        </div>
+        <label>Class ID (optional)</label>
+        <input id="classId" />
+        <label>Assignment ID (optional)</label>
+        <input id="assignmentId" />
+        <audio id="coachAudio" controls></audio>
+        <div class="log" id="log"></div>
+
+        <script>
+            const recordBtn = document.getElementById('recordBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const coachAudio = document.getElementById('coachAudio');
+            const log = document.getElementById('log');
+            const referenceText = document.getElementById('referenceText');
+            const classId = document.getElementById('classId');
+            const assignmentId = document.getElementById('assignmentId');
+
+            let mediaRecorder;
+            let chunks = [];
+            const sessionId = Math.random().toString(36).slice(2);
+
+            function appendLog(text) { log.textContent += text + "\n"; }
+
+            recordBtn.onclick = async () => {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                chunks = [];
+                mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+                mediaRecorder.ondataavailable = e => chunks.push(e.data);
+                mediaRecorder.onstop = sendAudio;
+                mediaRecorder.start();
+                recordBtn.disabled = true;
+                stopBtn.disabled = false;
+                appendLog("Recording...");
+            };
+
+            stopBtn.onclick = () => {
+                mediaRecorder.stop();
+                recordBtn.disabled = false;
+                stopBtn.disabled = true;
+            };
+
+            resetBtn.onclick = async () => {
+                const form = new FormData();
+                form.append('session_id', sessionId);
+                await fetch('/api/session/reset', { method: 'POST', body: form });
+                log.textContent = '';
+                coachAudio.src = '';
+                appendLog("Session reset.");
+            };
+
+            async function sendAudio() {
+                const blob = new Blob(chunks, { type: 'audio/webm' });
+                const form = new FormData();
+                form.append('audio', blob, 'audio.webm');
+                form.append('session_id', sessionId);
+                form.append('mode', 'tutor');
+                form.append('grade_level', '3');
+                form.append('user_id', 'reader');
+                form.append('reference_text', referenceText.value || '');
+                form.append('class_id', classId.value || '');
+                form.append('assignment_id', assignmentId.value || '');
+                appendLog("Sending audio...");
+                const resp = await fetch('/api/voice/turn', { method: 'POST', body: form });
+                if (!resp.ok) {
+                    appendLog("Error: " + resp.statusText);
+                    return;
+                }
+                const data = await resp.json();
+                appendLog("Transcript: " + data.transcript);
+                appendLog("Coach: " + data.coach_text);
+                const bytes = Uint8Array.from(atob(data.coach_audio_b64_mp3), c => c.charCodeAt(0));
+                const audioUrl = URL.createObjectURL(new Blob([bytes], { type: 'audio/mpeg' }));
+                coachAudio.src = audioUrl;
+                coachAudio.play();
+                appendLog("Latency (ms): " + data.latency_ms);
+            }
+        </script>
+    </body>
+</html>
+
+
