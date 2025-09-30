@@ -1,0 +1,78 @@
+version: "3.9"
+
+services:
+  content:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.content
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - CONTENT_DB_PATH=/data/content.db
+      - CONTENT_TEXTS_JSON=/app/data/texts/texts.json
+      - LITCOACH_EMBED_MODEL=text-embedding-3-small
+    volumes:
+      - ./data:/app/data
+      - content_db:/data
+    ports:
+      - "8002:8002"
+
+  assessment:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.assessment
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - LITCOACH_AGENT_MODEL=gpt-4o-mini
+    ports:
+      - "8003:8003"
+
+  teacher:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.teacher
+    environment:
+      - TEACHER_DB_PATH=/data/teacher.db
+    volumes:
+      - teacher_db:/data
+    ports:
+      - "8004:8004"
+
+  agent:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.agent
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - CONTENT_URL=http://content:8002
+      - ASSESSMENT_URL=http://assessment:8003
+      - LITCOACH_AGENT_MODEL=gpt-4o-mini
+    depends_on:
+      - content
+      - assessment
+    ports:
+      - "8001:8001"
+
+  gateway:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.gateway
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - AGENT_URL=http://agent:8001
+      - ASSESSMENT_URL=http://assessment:8003
+      - TEACHER_URL=http://teacher:8004
+      - LITCOACH_TTS_MODEL=tts-1
+      - LITCOACH_TRANSCRIBE_MODEL=whisper-1
+    depends_on:
+      - agent
+      - teacher
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+
+volumes:
+  content_db:
+  teacher_db:
+
+

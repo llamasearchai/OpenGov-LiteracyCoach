@@ -1,0 +1,62 @@
+{
+    "lookup_texts": {
+        "name": "lookup_texts",
+        "description": "Search leveled texts by lexile, grade, phonics pattern, theme",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "lexile_min": {"type": "integer"},
+                "lexile_max": {"type": "integer"},
+                "grade_band": {"type": "string"},
+                "phonics_focus": {"type": "string"},
+                "theme": {"type": "string"},
+                "limit": {"type": "integer"}
+            },
+            "required": []
+        }
+    },
+    "rag_search": {
+        "name": "rag_search",
+        "description": "Semantic search over curated corpus using vector similarity",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string"},
+                "k": {"type": "integer"}
+            },
+            "required": ["query"]
+        }
+    },
+    "assess_read_aloud": {
+        "name": "assess_read_aloud",
+        "description": "Compute WCPM and accuracy, return error analysis and coaching tips",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "reference_text": {"type": "string"},
+                "asr_transcript": {"type": "string"},
+                "timestamps": {
+                    "type": "array",
+                    "items": {"type": "number"}
+                }
+            },
+            "required": ["reference_text", "asr_transcript"]
+        }
+    },
+    "score_writing": {
+        "name": "score_writing",
+        "description": "Score writing using rubric dimensions and provide feedback",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "prompt": {"type": "string"},
+                "essay": {"type": "string"},
+                "grade_level": {"type": "string"},
+                "rubric_name": {"type": "string"}
+            },
+            "required": ["essay", "rubric_name"]
+        }
+    }
+}
+
+

@@ -1,0 +1,4 @@
+{"reference_text":"Sam had a cat.","asr_transcript":"Sam had a cat.","timestamps":[0.0,5.0],"gold_wcpm":72,"gold_accuracy":1.0}
+{"reference_text":"The Sun was declared the stronger.","asr_transcript":"The Sun was stronger.","timestamps":[0.0,6.0],"gold_wcpm":50,"gold_accuracy":0.67}
+
+
